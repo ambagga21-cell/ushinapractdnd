@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskBoard — Управление задачами</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Заголовок и описание -->
+        <header class="header">
+            <h1>📋 TaskBoard</h1>
+            <p class="description">Универсальная доска для планирования учебных задач, проектов, личных дел и командной работы. Организуйте свои дела эффективно!</p>
+        </header>
+
+        <!-- Область уведомлений -->
+        <div id="notification" class="notification hidden"></div>
+
+        <!-- Форма добавления задачи -->
+        <section class="add-task-section">
+            <h2>➕ Добавить новую задачу</h2>
+            <form id="taskForm" class="task-form">
+                <div class="form-row">
+                    <input type="text" id="taskTitle" placeholder="Название задачи" required class="form-input">
+                    <select id="taskCategory" class="form-input">
+                        <option value="study">📚 Учебная</option>
+                        <option value="home">🏠 Домашнее задание</option>
+                        <option value="project">💼 Проект</option>
+                        <option value="personal">👤 Личное</option>
+                        <option value="team">👥 Командная</option>
+                        <option value="exam">🎓 Подготовка к экзамену</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <textarea id="taskDescription" placeholder="Описание задачи (необязательно)" class="form-input textarea"></textarea>
+                </div>
+                <div class="form-row">
+                    <input type="date" id="taskDueDate" class="form-input">
+                    <select id="taskPriority" class="form-input">
+                        <option value="low">🟢 Низкий</option>
+                        <option value="medium" selected>🟡 Средний</option>
+                        <option value="high">🔴 Высокий</option>
+                        <option value="urgent">⚫ Срочный</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary">Добавить задачу</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Панель фильтрации и сортировки -->
+        <section class="filter-section">
+            <h2>🔍 Фильтры и сортировка</h2>
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <label for="filterCategory">Категория:</label>
+                    <select id="filterCategory" class="form-input">
+                        <option value="all">Все категории</option>
+                        <option value="study">📚 Учебная</option>
+                        <option value="home">🏠 Домашнее задание</option>
+                        <option value="project">💼 Проект</option>
+                        <option value="personal">👤 Личное</option>
+                        <option value="team">👥 Командная</option>
+                        <option value="exam">🎓 Подготовка к экзамену</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterPriority">Приоритет:</label>
+                    <select id="filterPriority" class="form-input">
+                        <option value="all">Все приоритеты</option>
+                        <option value="low">🟢 Низкий</option>
+                        <option value="medium">🟡 Средний</option>
+                        <option value="high">🔴 Высокий</option>
+                        <option value="urgent">⚫ Срочный</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="sortBy">Сортировка:</label>
+                    <select id="sortBy" class="form-input">
+                        <option value="created">По дате создания</option>
+                        <option value="dueDate">По сроку выполнения</option>
+                        <option value="priority">По приоритету</option>
+                        <option value="title">По названию</option>
+                    </select>
+                </div>
+                <button id="clearFilters" class="btn btn-secondary">Сбросить фильтры</button>
+            </div>
+        </section>
+
+        <!-- Счётчик задач -->
+        <section class="stats-section">
+            <div class="stats-card">
+                <span class="stats-number" id="totalTasks">0</span>
+                <span class="stats-label">Всего задач</span>
+            </div>
+            <div class="stats-card">
+                <span class="stats-number" id="completedTasks">0</span>
+                <span class="stats-label">Завершено</span>
+            </div>
+            <div class="stats-card">
+                <span class="stats-number" id="inProgressTasks">0</span>
+                <span class="stats-label">В работе</span>
+            </div>
+            <div class="stats-card">
+                <span class="stats-number" id="overdueTasks">0</span>
+                <span class="stats-label">Просрочено</span>
+            </div>
+        </section>
+
+        <!-- Доска с колонками -->
+        <section class="board-section">
+            <div class="board" id="board">
+                <!-- Колонка: Новые -->
+                <div class="column" data-status="new">
+                    <div class="column-header header-new">
+                        <h3>📝 Новые</h3>
+                        <span class="column-count" id="count-new">0</span>
+                    </div>
+                    <div class="column-content" id="column-new"></div>
+                </div>
+
+                <!-- Колонка: В работе -->
+                <div class="column" data-status="in-progress">
+                    <div class="column-header header-progress">
+                        <h3>🔄 В работе</h3>
+                        <span class="column-count" id="count-in-progress">0</span>
+                    </div>
+                    <div class="column-content" id="column-in-progress"></div>
+                </div>
+
+                <!-- Колонка: На проверке -->
+                <div class="column" data-status="review">
+                    <div class="column-header header-review">
+                        <h3>👀 На проверке</h3>
+                        <span class="column-count" id="count-review">0</span>
+                    </div>
+                    <div class="column-content" id="column-review"></div>
+                </div>
+
+                <!-- Колонка: Завершённые -->
+                <div class="column" data-status="done">
+                    <div class="column-header header-done">
+                        <h3>✅ Завершённые</h3>
+                        <span class="column-count" id="count-done">0</span>
+                    </div>
+                    <div class="column-content" id="column-done"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Модальное окно редактирования -->
+        <div id="editModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>✏️ Редактировать задачу</h2>
+                    <button class="modal-close" id="modalClose">&times;</button>
+                </div>
+                <form id="editForm" class="edit-form">
+                    <input type="hidden" id="editTaskId">
+                    <div class="form-row">
+                        <input type="text" id="editTitle" placeholder="Название задачи" required class="form-input">
+                    </div>
+                    <div class="form-row">
+                        <select id="editCategory" class="form-input">
+                            <option value="study">📚 Учебная</option>
+                            <option value="home">🏠 Домашнее задание</option>
+                            <option value="project">💼 Проект</option>
+                            <option value="personal">👤 Личное</option>
+                            <option value="team">👥 Командная</option>
+                            <option value="exam">🎓 Подготовка к экзамену</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <textarea id="editDescription" placeholder="Описание задачи" class="form-input textarea"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <input type="date" id="editDueDate" class="form-input">
+                        <select id="editPriority" class="form-input">
+                            <option value="low">🟢 Низкий</option>
+                            <option value="medium">🟡 Средний</option>
+                            <option value="high">🔴 Высокий</option>
+                            <option value="urgent">⚫ Срочный</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <select id="editStatus" class="form-input">
+                            <option value="new">📝 Новые</option>
+                            <option value="in-progress">🔄 В работе</option>
+                            <option value="review">👀 На проверке</option>
+                            <option value="done">✅ Завершённые</option>
+                        </select>
+                    </div>
+                    <div class="form-row modal-actions">
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                        <button type="button" class="btn btn-secondary" id="cancelEdit">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Модальное окно подтверждения удаления -->
+        <div id="deleteModal" class="modal hidden">
+            <div class="modal-content modal-small">
+                <div class="modal-header">
+                    <h2>🗑️ Удалить задачу?</h2>
+                    <button class="modal-close" id="deleteModalClose">&times;</button>
+                </div>
+                <p class="delete-message">Вы уверены, что хотите удалить эту задачу? Это действие нельзя отменить.</p>
+                <input type="hidden" id="deleteTaskId">
+                <div class="form-row modal-actions">
+                    <button class="btn btn-danger" id="confirmDelete">Удалить</button>
+                    <button class="btn btn-secondary" id="cancelDelete">Отмена</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
